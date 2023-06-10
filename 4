@@ -7,6 +7,7 @@ Sub ReconcileAndMatch()
     Dim foundMatch As Boolean
     Dim colorIndex As Long
     Dim threshold As Double
+    Dim selectedCount As Integer
     
     ' Set the ranges for columns E and F
     Set rngE = Range("E9:E15")
@@ -18,30 +19,20 @@ Sub ReconcileAndMatch()
     ' Get the threshold value from cell B3
     threshold = Range("B3").Value
     
-    ' Loop through each combination of cells in columns E and F
-    For Each cellE In rngE
-        For Each cellF In rngF
-            ' Skip empty cells
-            If cellE.Value <> "" And cellF.Value <> "" Then
-                combination = cellE.Value & " - " & cellF.Value
-                
-                ' Check if the combination is a match
-                If IsCombinationMatch(cellE.Value, cellF, rngF, threshold) Then
-                    foundMatch = True
-                    
-                    ' Highlight the matching combinations with a unique color
-                    cellE.Interior.ColorIndex = colorIndex
-                    cellF.Interior.ColorIndex = colorIndex
-                    
-                    ' Increment the color index for the next combination
-                    colorIndex = colorIndex + 1
-                End If
+    ' Loop through each combination size
+    For selectedCount = 2 To rngF.Rows.Count
+        ' Loop through each combination of cells in columns E and F
+        For Each cellE In rngE
+            ' Skip empty cells in column E
+            If cellE.Value <> "" Then
+                ' Recursively check combinations in column F
+                foundMatch = CheckCombinations(cellE.Value, rngF, selectedCount, threshold, colorIndex)
             End If
-        Next cellF
-        
-        ' Reset the flag for the next iteration
-        foundMatch = False
-    Next cellE
+            
+            ' Increment the color index for the next combination
+            If foundMatch Then colorIndex = colorIndex + 1
+        Next cellE
+    Next selectedCount
     
     ' Exit the sub if there are no errors
     Exit Sub
@@ -52,34 +43,82 @@ ErrorHandler:
     Resume Next
 End Sub
 
-Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range, threshold As Double, Optional selectedCount As Integer = 1) As Boolean
-    Dim cell As Range
-    Dim remainingCount As Integer
-    Dim remainingRange As Range
-    Dim remainingAmount As Double
+Function CheckCombinations(amount As Variant, rng As Range, selectedCount As Integer, threshold As Double, ByRef colorIndex As Long) As Boolean
+    Dim combinations() As Variant
+    Dim combination() As Variant
+    Dim index() As Integer
+    Dim i As Integer, j As Integer, k As Integer
+    Dim sum As Double
+    Dim foundMatch As Boolean
     
-    remainingCount = selectedCount - 1
+    ' Generate combinations of the selected count from the range
+    combinations = GetCombinations(rng.Value, selectedCount)
     
-    ' Base case: selectedCount is 1, check if the remaining amount is within the threshold
-    If remainingCount = 0 Then
-        remainingAmount = amount - targetCell.Value
-        If remainingAmount >= -threshold And remainingAmount <= threshold Then
-            IsCombinationMatch = True
+    ' Loop through each combination
+    For i = LBound(combinations) To UBound(combinations)
+        combination = combinations(i)
+        sum = 0
+        
+        ' Calculate the sum of the combination
+        For j = LBound(combination) To UBound(combination)
+            sum = sum + combination(j)
+        Next j
+        
+        ' Check if the sum is within the threshold
+        If Abs(amount - sum) <= threshold Then
+            foundMatch = True
+            
+            ' Highlight the matching combinations with a unique color
+            For k = LBound(combination) To UBound(combination)
+                rng.Cells(k + 1).Offset(0, -1).Interior.ColorIndex = colorIndex
+                rng.Cells(k + 1).Interior.ColorIndex = colorIndex
+            Next k
         End If
-        Exit Function
-    End If
+    Next i
     
-    ' Recursive case: selectedCount is greater than 1
-    Set remainingRange = Range(targetCell.Offset(1), targetRange.Cells(targetRange.Cells.Count))
+    ' Return whether a match was found
+    CheckCombinations = foundMatch
+End Function
+
+Function GetCombinations(data() As Variant, selectedCount As Integer) As Variant()
+    Dim combinations() As Variant
+    Dim indices() As Integer
+    Dim i As Integer, j As Integer, n As Integer, r As Integer
+    Dim lastIndex As Integer
     
-    For Each cell In remainingRange
-        If cell.Value <> "" Then
-            If IsCombinationMatch(amount - targetCell.Value, cell, remainingRange, threshold, remainingCount) Then
-                IsCombinationMatch = True
-                Exit Function
-            End If
+    n = UBound(data) - LBound(data) + 1
+    r = selectedCount
+    
+    ReDim combinations(1 To Application.WorksheetFunction.Combin(n, r))
+    ReDim indices(1 To r)
+    
+    For i = 1 To r
+        indices(i) = i
+    Next i
+    
+    i = 1
+    Do While i > 0
+        For j = 1 To r
+            combinations(lastIndex + 1, j) = data(indices(j))
+        Next j
+        
+        lastIndex = lastIndex + 1
+        
+        If indices(r) = n Then
+            i = r - 1
+            Do While i > 0 And indices(i) = n - r + i
+                i = i - 1
+            Loop
+        Else
+            indices(r) = indices(r) + 1
         End If
-    Next cell
+        
+        If i > 0 Then
+            For j = i To r
+                indices(j) = indices(i) + j - i
+            Next j
+        End If
+    Loop
     
-    IsCombinationMatch = False
+    GetCombinations = combinations
 End Function
