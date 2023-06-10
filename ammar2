@@ -8,19 +8,20 @@ Sub FindEqualCombinations()
     Dim count As Long
     Dim i As Long
     
-    ' Modify these arrays to include your values
-    valuesA = Range("A1:A5").Value
-    valuesB = Range("B1:B5").Value
+    ' Modify these ranges to match your data
+    valuesA = Range("E8:E18").Value
+    valuesB = Range("F8:F15").Value
     
-    ReDim used(0 To UBound(valuesA)) ' Array to track which values are used in the current combination
+    ReDim used(1 To UBound(valuesA, 1)) ' Array to track which values are used in the current combination
     
     count = 0 ' Initialize count
     
     ' Start the recursive backtracking
+    ReDim result(1 To 1) ' Initialize result array
     Backtrack valuesA, valuesB, used, result, count, 1, Array()
     
     ' Output the equal combinations to the immediate window
-    For i = 1 To UBound(result)
+    For i = 1 To count
         Debug.Print Join(result(i), ", ")
     Next i
 End Sub
@@ -28,7 +29,7 @@ End Sub
 Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long, combination() As Variant)
     Dim i As Long
     
-    If level > UBound(valuesA) + 1 Then ' All positions in the combination have been filled
+    If level > UBound(valuesA, 1) + 1 Then ' All positions in the combination have been filled
         Dim equal As Boolean
         equal = True ' Assume the combination is equal
         
@@ -45,11 +46,11 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
             result(count) = combination ' Copy the combination to the result array
         End If
     Else
-        For i = 1 To UBound(valuesA) + 1
+        For i = 1 To UBound(valuesA, 1) + 1
             If Not used(i - 1) Then
                 used(i - 1) = True ' Mark the value as used
-                ReDim Preserve combination(1 To level, 1 To 1)
-                combination(level, 1) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
+                ReDim Preserve combination(1 To level)
+                combination(level) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
                 
                 Backtrack valuesA, valuesB, used, result, count, level + 1, combination ' Recursive call
                 
