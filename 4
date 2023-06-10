@@ -57,22 +57,45 @@ Sub PerformMatching(rngE As Range, rngF As Range, threshold As Double)
 End Sub
 
 Sub RecursiveMatchAndHighlight(cellE As Range, cellF As Range, threshold As Double)
-    Dim cell As Range
-    Dim combination As Double
+    Dim combinations As Collection
+    Set combinations = New Collection
     
-    combination = cellE.Value + cellF.Value
+    Dim result As Variant
+    result = RecursiveFindCombinations(cellE, cellF, threshold, combinations)
     
-    ' Check if the combination is within the threshold
-    If Abs(combination - threshold) <= threshold Then
-        ' Highlight the matching combination with a unique color
-        cellE.Interior.Color = RGB(255, 255, 0) ' Yellow color
-        cellF.Interior.Color = RGB(255, 255, 0) ' Yellow color
-        Debug.Print "Matching combination found: " & cellE.Value & " + " & cellF.Value
+    If Not IsEmpty(result) Then
+        Dim combination As Range
+        For Each combination In result
+            combination.Interior.Color = RGB(255, 255, 0) ' Yellow color
+        Next combination
     End If
-    
-    ' Perform recursive matching for the remaining cells in column F
-    For Each cell In cellF.Offset(1).Resize(cellF.Parent.Cells(Rows.Count, cellF.Column).End(xlUp).Row - cellF.Row)
-        Debug.Print "Recursive matching: " & cellE.Value & " + " & cell.Value
-        RecursiveMatchAndHighlight cellE, cell, threshold
-    Next cell
 End Sub
+
+Function RecursiveFindCombinations(cellE As Range, cellF As Range, threshold As Double, combinations As Collection) As Variant
+    Dim remainingRange As Range
+    Set remainingRange = cellF.Offset(1).Resize(cellF.Parent.Cells(Rows.Count, cellF.Column).End(xlUp).Row - cellF.Row)
+    
+    Dim combination As Range
+    For Each combination In remainingRange
+        Dim sum As Double
+        sum = cellE.Value + cellF.Value + combination.Value
+        
+        If Abs(sum - threshold) <= threshold Then
+            combinations.Add combination
+        End If
+        
+        Dim result As Variant
+        result = RecursiveFindCombinations(cellE, combination, threshold, combinations)
+        
+        If Not IsEmpty(result) Then
+            RecursiveFindCombinations = result
+            Exit Function
+        End If
+    Next combination
+    
+    If combinations.Count > 0 Then
+        RecursiveFindCombinations = combinations.Items
+    Else
+        RecursiveFindCombinations = Empty
+    End If
+End Function
