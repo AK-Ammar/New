@@ -17,21 +17,24 @@ Sub ReconcileAndMatch()
     ' Loop through each combination of cells in columns E and F
     For Each cellE In rngE
         For Each cellF In rngF
-            combination = cellE.Value & " - " & cellF.Value
-            
-            ' Check if the combination is equal
-            If cellE.Value = cellF.Value Then
-                foundMatch = True
+            ' Skip empty cells
+            If cellE.Value <> "" And cellF.Value <> "" Then
+                combination = cellE.Value & " - " & cellF.Value
                 
-                ' Highlight the matching numbers with a unique color
-                cellE.Interior.ColorIndex = colorIndex
-                cellF.Interior.ColorIndex = colorIndex
-                
-                ' Increment the color index for the next combination
-                colorIndex = colorIndex + 1
-                
-                ' Exit the inner loop if a match is found
-                Exit For
+                ' Check if the combination is equal
+                If cellE.Value = cellF.Value Then
+                    foundMatch = True
+                    
+                    ' Highlight the matching numbers with a unique color
+                    cellE.Interior.ColorIndex = colorIndex
+                    cellF.Interior.ColorIndex = colorIndex
+                    
+                    ' Increment the color index for the next combination
+                    colorIndex = colorIndex + 1
+                    
+                    ' Exit the inner loop if a match is found
+                    Exit For
+                End If
             End If
         Next cellF
         
