@@ -11,7 +11,7 @@ Sub FindEqualCombinations()
     valuesA = Range("E8:E18").Value
     valuesB = Range("F8:F15").Value
     
-    ReDim used(1 To UBound(valuesA, 1)) ' Array to track which values are used in the current combination
+    ReDim used(0 To UBound(valuesA, 1) - 1) ' Array to track which values are used in the current combination
     
     count = 0 ' Initialize count
     
@@ -33,8 +33,8 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
         Dim equal As Boolean
         equal = True ' Assume the combination is equal
         
-        For i = 2 To UBound(used)
-            If Not used(i) Or valuesA(i - 1, 1) <> valuesA(i - 2, 1) Or valuesB(i - 1, 1) <> valuesB(i - 2, 1) Then
+        For i = 2 To UBound(used) + 1
+            If Not used(i - 1) Or valuesA(i - 1, 1) <> valuesA(i - 2, 1) Or valuesB(i - 1, 1) <> valuesB(i - 2, 1) Then
                 equal = False ' Not equal
                 Exit For
             End If
@@ -46,11 +46,11 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
             result(count) = GetCombination(valuesA, used) ' Copy the combination to the result array
         End If
     Else
-        For i = 1 To UBound(valuesA, 1) + 1
-            If Not used(i - 1) Then
-                used(i - 1) = True ' Mark the value as used
+        For i = 0 To UBound(valuesA, 1) - 1
+            If Not used(i) Then
+                used(i) = True ' Mark the value as used
                 Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
-                used(i - 1) = False ' Reset the used flag
+                used(i) = False ' Reset the used flag
             End If
         Next i
     End If
@@ -70,7 +70,7 @@ Function GetCombination(valuesA() As Variant, used() As Boolean) As Variant
     For i = 1 To maxCount
         If used(i - 1) Then
             count = count + 1
-            combination(count) = valuesA(i - 1, 1)
+            combination(count) = valuesA(i, 1)
         End If
     Next i
     
