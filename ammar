@@ -6,7 +6,6 @@ Sub FindEqualCombinations()
     Dim result() As Variant
     Dim used() As Boolean
     Dim count As Long
-    Dim i As Long
     
     ' Modify these ranges to match your data
     valuesA = Range("E8:E18").Value
@@ -18,15 +17,16 @@ Sub FindEqualCombinations()
     
     ' Start the recursive backtracking
     ReDim result(1 To 1) ' Initialize result array
-    Backtrack valuesA, valuesB, used, result, count, 1, Array(1 To UBound(valuesA, 1) + 1)
+    Backtrack valuesA, valuesB, used, result, count, 1
     
     ' Output the equal combinations to the immediate window
+    Dim i As Long
     For i = 1 To count
         Debug.Print Join(result(i), ", ")
     Next i
 End Sub
 
-Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long, combination() As Variant)
+Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long)
     Dim i As Long
     
     If level > UBound(valuesA, 1) + 1 Then ' All positions in the combination have been filled
@@ -43,19 +43,37 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
         If equal Then ' Combination is equal
             count = count + 1
             ReDim Preserve result(1 To count)
-            result(count) = combination ' Copy the combination to the result array
+            result(count) = GetCombination(valuesA, used) ' Copy the combination to the result array
         End If
     Else
         For i = 1 To UBound(valuesA, 1) + 1
             If Not used(i - 1) Then
                 used(i - 1) = True ' Mark the value as used
-                ReDim Preserve combination(1 To level)
-                combination(level) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
-                
-                Backtrack valuesA, valuesB, used, result, count, level + 1, combination ' Recursive call
-                
+                Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
                 used(i - 1) = False ' Reset the used flag
             End If
         Next i
     End If
 End Sub
+
+Function GetCombination(valuesA() As Variant, used() As Boolean) As Variant
+    Dim combination() As Variant
+    Dim i As Long
+    Dim count As Long
+    
+    count = 0 ' Count the number of used positions
+    Dim maxCount As Long
+    maxCount = UBound(valuesA, 1)
+    
+    ReDim combination(1 To maxCount)
+    
+    For i = 1 To maxCount
+        If used(i - 1) Then
+            count = count + 1
+            combination(count) = valuesA(i - 1, 1)
+        End If
+    Next i
+    
+    ReDim Preserve combination(1 To count)
+    GetCombination = combination
+End Function
