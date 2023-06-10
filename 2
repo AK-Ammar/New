@@ -1,0 +1,133 @@
+Option Explicit
+
+Sub FindEqualCombinations()
+    Dim valuesA() As Variant
+    Dim valuesB() As Variant
+    Dim result() As Variant
+    Dim used() As Boolean
+    Dim count As Long
+    
+    ' Modify these ranges to match your data
+    valuesA = Range("E8:E18").Value
+    valuesB = Range("F8:F15").Value
+    
+    ReDim used(0 To UBound(valuesA, 1) - 1) ' Array to track which values are used in the current combination
+    
+    count = 0 ' Initialize count
+    
+    ' Start the recursive backtracking
+    ReDim result(1 To 1) ' Initialize result array
+    Backtrack valuesA, valuesB, used, result, count, 1
+    
+    ' Output the equal combinations to the immediate window
+    Dim i As Long
+    For i = 1 To count
+        Debug.Print Join(result(i), ", ")
+    Next i
+    
+    ' Highlight the matching combinations
+    HighlightMatchingCombinations valuesA, valuesB, result
+End Sub
+
+Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long)
+    Dim i As Long
+    
+    If level > UBound(valuesA, 1) + 1 Then ' All positions in the combination have been filled
+        Dim equal As Boolean
+        equal = True ' Assume the combination is equal
+        
+        For i = 2 To UBound(used) + 1
+            If Not used(i - 1) Or valuesA(i - 1, 1) <> valuesA(i - 2, 1) Or valuesB(i - 1, 1) <> valuesB(i - 2, 1) Then
+                equal = False ' Not equal
+                Exit For
+            End If
+        Next i
+        
+        If equal Then ' Combination is equal
+            count = count + 1
+            ReDim Preserve result(1 To count)
+            result(count) = GetCombination(valuesA, used) ' Copy the combination to the result array
+        End If
+    ElseIf level = 2 Then ' Early exit check
+        Dim equal As Boolean
+        equal = True ' Assume the combination is equal
+        
+        If valuesA(0, 1) <> valuesA(1, 1) Or valuesB(0, 1) <> valuesB(1, 1) Then
+            equal = False ' Not equal
+        End If
+        
+        If equal Then
+            used(0) = True ' Mark the first value as used
+            Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
+            used(0) = False ' Reset the used flag
+        End If
+    Else
+        For i = 0 To UBound(valuesA, 1) - 1
+            If Not used(i) Then
+                used(i) = True ' Mark the value as used
+                Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
+                used(i) = False ' Reset the used flag
+            End If
+        Next i
+    End If
+End Sub
+
+Function GetCombination(valuesA() As Variant, used() As Boolean) As Variant
+    Dim combination() As Variant
+    Dim i As Long
+    Dim count As Long
+    
+    count = 0 ' Count the number of used positions
+    Dim maxCount As Long
+    maxCount = UBound(valuesA, 1)
+    
+    ReDim combination(1 To maxCount)
+    
+    For i = 1 To maxCount
+        If used(i - 1) Then
+            count = count + 1
+            combination(count) = valuesA(i, 1)
+        End If
+    Next i
+    
+    ReDim Preserve combination(1 To count)
+    GetCombination = combination
+End Function
+
+Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, result() As Variant)
+    Dim rngA As Range
+    Dim rngB As Range
+    Dim cellA As Range
+    Dim cellB As Range
+    Dim combination As Variant
+    Dim i As Long
+    
+    ' Modify these ranges to match your data
+    Set rngA = Range("E8:E18")
+    Set rngB = Range("F8:F15")
+    
+    ' Clear previous highlighting
+    rngA.Interior.ColorIndex = xlNone
+    rngB.Interior.ColorIndex = xlNone
+    
+    ' Loop through the result combinations
+    For i = 1 To UBound(result)
+        combination = result(i)
+        
+        ' Loop through the values in the combination
+        For Each cellA In rngA
+            If Not IsEmpty(cellA) Then
+                For Each cellB In rngB
+                    If Not IsEmpty(cellB) Then
+                        ' Check if the combination matches the values in columns A and B
+                        If cellA.Value = combination(1) And cellB.Value = combination(2) Then
+                            ' Highlight the matching cells
+                            cellA.Interior.Color = RGB(255, 255, 0) ' Yellow
+                            cellB.Interior.Color = RGB(255, 255, 0) ' Yellow
+                        End If
+                    End If
+                Next cellB
+            End If
+        Next cellA
+    Next i
+End Sub
