@@ -21,27 +21,19 @@ Sub ReconcileAndMatch()
             If cellE.Value <> "" And cellF.Value <> "" Then
                 combination = cellE.Value & " - " & cellF.Value
                 
-                ' Check if the combination is equal
-                If cellE.Value = cellF.Value Then
+                ' Check if the combination is a match
+                If IsCombinationMatch(cellE.Value, cellF, rngF) Then
                     foundMatch = True
                     
-                    ' Highlight the matching numbers with a unique color
+                    ' Highlight the matching combinations with a unique color
                     cellE.Interior.ColorIndex = colorIndex
                     cellF.Interior.ColorIndex = colorIndex
                     
                     ' Increment the color index for the next combination
                     colorIndex = colorIndex + 1
-                    
-                    ' Exit the inner loop if a match is found
-                    Exit For
                 End If
             End If
         Next cellF
-        
-        ' Print statement for non-matching combinations
-        If Not foundMatch Then
-            Debug.Print combination & " is not a match."
-        End If
         
         ' Reset the flag for the next iteration
         foundMatch = False
@@ -55,3 +47,18 @@ ErrorHandler:
     Debug.Print "An error occurred: " & Err.Description
     Resume Next
 End Sub
+
+Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range) As Boolean
+    Dim cell As Range
+    
+    For Each cell In targetRange
+        If cell.Address <> targetCell.Address And cell.Value <> "" Then
+            If amount = cell.Value + targetCell.Value Then
+                IsCombinationMatch = True
+                Exit Function
+            End If
+        End If
+    Next cell
+    
+    IsCombinationMatch = False
+End Function
