@@ -37,7 +37,7 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
         equal = True ' Assume the combination is equal
         
         For i = 2 To UBound(used) + 1
-            If Not used(i - 1) Or valuesA(i - 1, 1) <> valuesA(i - 2, 1) Or valuesB(i - 1, 1) <> valuesB(i - 2, 1) Then
+            If Not used(i - 1) Or valuesA(i - 1, 1) <> valuesA(i, 1) Or valuesB(i - 1, 1) <> valuesB(i, 1) Then
                 equal = False ' Not equal
                 Exit For
             End If
@@ -49,14 +49,9 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
             result(count) = GetCombination(valuesA, used) ' Copy the combination to the result array
         End If
     ElseIf level = 2 Then ' Early exit check
-        Dim equal As Boolean
-        equal = True ' Assume the combination is equal
-        
         If valuesA(0, 1) <> valuesA(1, 1) Or valuesB(0, 1) <> valuesB(1, 1) Then
-            equal = False ' Not equal
-        End If
-        
-        If equal Then
+            Exit Sub ' Not equal, exit early
+        Else
             used(0) = True ' Mark the first value as used
             Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
             used(0) = False ' Reset the used flag
