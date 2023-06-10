@@ -6,6 +6,7 @@ Sub ReconcileAndMatch()
     Dim combination As String
     Dim foundMatch As Boolean
     Dim colorIndex As Long
+    Dim threshold As Double
     
     ' Set the ranges for columns E and F
     Set rngE = Range("E9:E15")
@@ -13,6 +14,9 @@ Sub ReconcileAndMatch()
     
     ' Set the initial color index
     colorIndex = 3 ' Start with color yellow (color index 3)
+    
+    ' Get the threshold value from cell B3
+    threshold = Range("B3").Value
     
     ' Loop through each combination of cells in columns E and F
     For Each cellE In rngE
@@ -22,7 +26,7 @@ Sub ReconcileAndMatch()
                 combination = cellE.Value & " - " & cellF.Value
                 
                 ' Check if the combination is a match
-                If IsCombinationMatch(cellE.Value, cellF, rngF) Then
+                If IsCombinationMatch(cellE.Value, cellF, rngF, threshold) Then
                     foundMatch = True
                     
                     ' Highlight the matching combinations with a unique color
@@ -48,12 +52,12 @@ ErrorHandler:
     Resume Next
 End Sub
 
-Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range) As Boolean
+Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range, threshold As Double) As Boolean
     Dim cell As Range
     
     For Each cell In targetRange
         If cell.Address <> targetCell.Address And cell.Value <> "" Then
-            If amount = cell.Value + targetCell.Value Then
+            If Abs(amount - (cell.Value + targetCell.Value)) <= threshold Then
                 IsCombinationMatch = True
                 Exit Function
             End If
