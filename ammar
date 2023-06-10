@@ -1,0 +1,60 @@
+Option Explicit
+
+Sub FindEqualCombinations()
+    Dim valuesA() As Variant
+    Dim valuesB() As Variant
+    Dim result() As Variant
+    Dim used() As Boolean
+    Dim count As Long
+    
+    ' Modify these arrays to include your values
+    valuesA = Range("A1:A5").Value
+    valuesB = Range("B1:B5").Value
+    
+    ReDim used(1 To UBound(valuesA) + 1) ' Array to track which values are used in the current combination
+    
+    count = 0 ' Initialize count
+    ReDim result(1 To count) ' Initialize result array
+    
+    ' Start the recursive backtracking
+    Backtrack valuesA, valuesB, used, result, count, 1
+    
+    ' Output the equal combinations to the immediate window
+    For i = 1 To UBound(result)
+        Debug.Print Join(result(i), ", ")
+    Next i
+End Sub
+
+Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, result() As Variant, ByRef count As Long, ByVal level As Long)
+    Dim i As Long
+    
+    If level > UBound(valuesA) + 1 Then ' All positions in the combination have been filled
+        Dim equal As Boolean
+        equal = True ' Assume the combination is equal
+        
+        For i = 2 To UBound(used)
+            If Not used(i) Or valuesA(i - 1, 1) <> valuesA(i - 2, 1) Or valuesB(i - 1, 1) <> valuesB(i - 2, 1) Then
+                equal = False ' Not equal
+                Exit For
+            End If
+        Next i
+        
+        If equal Then ' Combination is equal
+            count = count + 1
+            ReDim Preserve result(1 To count)
+            result(count) = Application.Index(valuesA, 0) ' Copy the combination from column A to the result array
+        End If
+    Else
+        For i = 1 To UBound(valuesA) + 1
+            If Not used(i) Then
+                used(i) = True ' Mark the value as used
+                valuesA(level - 1, 1) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
+                valuesB(level - 1, 1) = valuesB(i - 1, 1) ' Assign the value from column B to the current position
+                
+                Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
+                
+                used(i) = False ' Reset the used flag
+            End If
+        Next i
+    End If
+End Sub
