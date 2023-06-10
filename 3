@@ -1,0 +1,42 @@
+Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, result() As Variant)
+    Dim rngA As Range
+    Dim rngB As Range
+    Dim cellA As Range
+    Dim cellB As Range
+    Dim combination As Variant
+    Dim i As Long
+    
+    ' Modify these ranges to match your data
+    Set rngA = Range("E8:E18")
+    Set rngB = Range("F8:F15")
+    
+    ' Clear previous highlighting
+    rngA.Interior.ColorIndex = xlNone
+    rngB.Interior.ColorIndex = xlNone
+    
+    ' Loop through the result combinations
+    For i = 1 To UBound(result)
+        combination = result(i)
+        
+        ' Loop through the values in the combination
+        For Each cellA In rngA
+            If Not IsEmpty(cellA) Then
+                For Each cellB In rngB
+                    If Not IsEmpty(cellB) Then
+                        ' Check if the combination matches the values in columns A and B
+                        Debug.Print "Comparing values:"
+                        Debug.Print "cellA.Value: " & cellA.Value
+                        Debug.Print "combination(1): " & combination(1)
+                        Debug.Print "cellB.Value: " & cellB.Value
+                        Debug.Print "combination(2): " & combination(2)
+                        If CStr(cellA.Value) = CStr(combination(1)) And CStr(cellB.Value) = CStr(combination(2)) Then
+                            ' Highlight the matching cells
+                            cellA.Interior.Color = RGB(255, 255, 0) ' Yellow
+                            cellB.Interior.Color = RGB(255, 255, 0) ' Yellow
+                        End If
+                    End If
+                Next cellB
+            End If
+        Next cellA
+    Next i
+End Sub
