@@ -115,7 +115,14 @@ Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, re
                 For Each cellB In rngB
                     If Not IsEmpty(cellB) Then
                         ' Check if the combination matches the values in columns A and B
-                        If StrComp(CStr(cellA.Value), CStr(combination(1)), vbTextCompare) = 0 And StrComp(CStr(cellB.Value), CStr(combination(2)), vbTextCompare) = 0 Then
+                        If IsNumeric(combination(1)) And IsNumeric(combination(2)) Then
+    If CDec(cellA.Value) = CDec(combination(1)) And CDec(cellB.Value) = CDec(combination(2)) Then
+        ' Highlight the matching cells
+        cellA.Interior.Color = RGB(255, 255, 0) ' Yellow
+        cellB.Interior.Color = RGB(255, 255, 0) ' Yellow
+    End If
+End If
+
                             ' Highlight the matching cells
                             cellA.Interior.Color = RGB(255, 255, 0) ' Yellow
                             cellB.Interior.Color = RGB(255, 255, 0) ' Yellow
