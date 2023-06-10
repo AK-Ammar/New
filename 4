@@ -63,7 +63,7 @@ Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange 
     ' Base case: selectedCount is 1, check if the remaining amount is within the threshold
     If remainingCount = 0 Then
         remainingAmount = amount - targetCell.Value
-        If Abs(remainingAmount) <= threshold Then
+        If remainingAmount >= -threshold And remainingAmount <= threshold Then
             IsCombinationMatch = True
         End If
         Exit Function
