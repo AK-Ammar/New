@@ -4,7 +4,7 @@ Sub ReconcileAndMatch()
     On Error GoTo ErrorHandler
     
     Dim rngE As Range, rngF As Range
-    Dim cellE As Range, cellF As Range
+    Dim cellE As Range, cellF As Range, cellG As Range
     Dim combination As String
     Dim foundMatch As Boolean
     Dim colorIndex As Long
@@ -27,13 +27,44 @@ Sub ReconcileAndMatch()
         For Each cellE In rngE
             ' Skip empty cells in column E
             If cellE.Value <> "" Then
-                ' Recursively check combinations in column F
+                ' Loop through each combination of cells in column F
+                For Each cellF In rngF
+                    ' Skip empty cells in column F
+                    If cellF.Value <> "" Then
+                        ' Check if the combination is equal
+                        If selectedCount = 2 Then
+                            ' Check if the combination is within the threshold
+                            If Abs(cellE.Value - cellF.Value) <= threshold Then
+                                foundMatch = True
+                                ' Highlight the matching combination with a unique color
+                                cellE.Interior.ColorIndex = colorIndex
+                                cellF.Interior.ColorIndex = colorIndex
+                            End If
+                        Else
+                            ' Loop through each cell in column F again
+                            For Each cellG In rngF
+                                ' Skip empty cells in column F
+                                If cellG.Value <> "" Then
+                                    ' Calculate the combination
+                                    combination = cellE.Value + cellF.Value + cellG.Value
+                                    ' Check if the combination is within the threshold
+                                    If Abs(combination - threshold) <= threshold Then
+                                        foundMatch = True
+                                        ' Highlight the matching combination with a unique color
+                                        cellE.Interior.ColorIndex = colorIndex
+                                        cellF.Interior.ColorIndex = colorIndex
+                                        cellG.Interior.ColorIndex = colorIndex
+                                    End If
+                                End If
+                            Next cellG
+                        End If
+                    End If
+                Next cellF
+                
+                ' Increment the color index for the next combination
+                If foundMatch Then colorIndex = colorIndex + 1
                 foundMatch = False
-                FindMatchingCombinations cellE.Value, rngF, selectedCount, threshold, cellE, colorIndex, foundMatch, 0, rngE.Offset(0, 1).Resize(rngE.Rows.Count, rngE.Columns.Count - 1)
             End If
-            
-            ' Increment the color index for the next combination
-            If foundMatch Then colorIndex = colorIndex + 1
         Next cellE
     Next selectedCount
     
@@ -44,83 +75,4 @@ ErrorHandler:
     ' Error handling code
     Debug.Print "An error occurred: " & Err.Description
     Resume Next
-End Sub
-
-Sub FindMatchingCombinations(amount As Double, rng As Range, selectedCount As Integer, threshold As Double, ByRef cellE As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer, excludeRange As Range)
-    Dim rngF As Range
-    Dim cellF As Range
-    Dim combination As Double
-    
-    ' Set the range for column F excluding the selected cells in column E
-    Set rngF = rng.Resize(rng.Rows.Count - (excludeRange.Rows.Count - 1))
-    Set rngF = Application.Intersect(rngF, rngF.Worksheet.Columns(rngF.Column))
-    
-    ' Loop through each cell in column F
-    For Each cellF In rngF
-        ' Skip empty cells in column F
-        If cellF.Value <> "" Then
-            ' Calculate the combination
-            combination = cellE.Value + cellF.Value
-            
-            ' Check if the combination is within the threshold
-            If Abs(amount - combination) <= threshold Then
-                foundMatch = True
-                
-                ' Highlight the matching combination with a unique color
-                cellE.Interior.ColorIndex = colorIndex
-                cellF.Interior.ColorIndex = colorIndex
-            End If
-            
-            ' Check for additional numbers to reach the selected count
-            If selectedCount > 2 Then
-                If Not foundMatch Then
-                    ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, selectedCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange.Offset(0, 1).Resize(excludeRange.Rows.Count, excludeRange.Columns.Count - 1)
-                End If
-            End If
-        End If
-    Next cellF
-End Sub
-
-Sub FindRemainingNumbers(amount As Double, rng As Range, remainingCount As Integer, threshold As Double, ByRef cellE As Range, ByRef cellF As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer, excludeRange As Range)
-    Dim rngF As Range
-    Dim cellG As Range
-    Dim combination As Double
-    
-    ' Set the range for column F excluding the selected cells in column E and F
-    Set rngF = rng.Resize(rng.Rows.Count - (excludeRange.Rows.Count - 1))
-    Set rngF = Application.Intersect(rngF, rngF.Worksheet.Columns(rngF.Column))
-    
-    ' Loop through each cell in column F
-    For Each cellG In rngF
-        ' Skip empty cells in column F
-        If cellG.Value <> "" Then
-            ' Calculate the combination
-            combination = cellE.Value + cellF.Value + cellG.Value
-            
-            ' Check if the combination is within the threshold
-            If Abs(amount - combination) <= threshold Then
-                foundMatch = True
-                
-                ' Highlight the matching combination with a unique color
-                cellE.Interior.ColorIndex = colorIndex
-                cellF.Interior.ColorIndex = colorIndex
-                cellG.Interior.ColorIndex = colorIndex
-            End If
-            
-            ' Check for additional numbers to reach the selected count
-            If remainingCount > 2 Then
-                If Not foundMatch Then
-                    ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, remainingCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange.Offset(0, 1).Resize(excludeRange.Rows.Count, excludeRange.Columns.Count - 1)
-                End If
-            End If
-        End If
-    Next cellG
-    
-    ' Check if maximum iteration count is reached
-    iterationCount = iterationCount + 1
-    If iterationCount >= 1000 Then
-        Exit Sub ' Exit the function to prevent infinite loops
-    End If
 End Sub
