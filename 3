@@ -1,21 +1,43 @@
-Sub TestHighlightMatchingCombinations()
-    ' Sample data
-    Dim valuesA() As Variant
-    Dim valuesB() As Variant
-    valuesA = Range("E8:E18").Value
-    valuesB = Range("F8:F15").Value
-    
-    ' Generate combinations
+Function GenerateCombinations(valuesA() As Variant, valuesB() As Variant) As Variant()
     Dim result() As Variant
-    result = GenerateCombinations(valuesA, valuesB)
-    
-    ' Debug print to check the content of the result array
-    Debug.Print "Result Array:"
+    Dim count As Long
     Dim i As Long
-    For i = LBound(result) To UBound(result)
-        Debug.Print "Combination " & i & ": " & result(i)(1) & ", " & result(i)(2)
-    Next i
+    Dim j As Long
+    Dim level As Long
+    Dim used() As Boolean
+    Dim combination() As Variant
     
-    ' Call HighlightMatchingCombinations with populated result array
-    HighlightMatchingCombinations valuesA, valuesB, result
+    count = 0
+    ReDim result(1 To UBound(valuesA) * UBound(valuesB), 1 To 2)
+    ReDim used(1 To UBound(valuesA) + 1)
+    ReDim combination(1 To 2)
+    
+    Backtrack valuesA, valuesB, used, result, count, 1, combination
+    
+    ReDim Preserve result(1 To count)
+    GenerateCombinations = result
+End Function
+
+Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, result() As Variant, ByRef count As Long, ByVal level As Long, ByRef combination() As Variant)
+    Dim i As Long
+    
+    If level > 2 Then
+        count = count + 1
+        result(count)(1) = combination(1)
+        result(count)(2) = combination(2)
+        Exit Sub
+    End If
+    
+    For i = 1 To UBound(valuesA)
+        If Not used(i) Then
+            used(i) = True
+            If level = 1 Then
+                combination(level) = valuesA(i, 1)
+            Else
+                combination(level) = valuesB(i, 1)
+            End If
+            Backtrack valuesA, valuesB, used, result, count, level + 1, combination
+            used(i) = False
+        End If
+    Next i
 End Sub
