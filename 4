@@ -29,7 +29,7 @@ Sub ReconcileAndMatch()
             If cellE.Value <> "" Then
                 ' Recursively check combinations in column F
                 foundMatch = False
-                FindMatchingCombinations cellE.Value, rngF, selectedCount, threshold, cellE, colorIndex, foundMatch, 0, rngE
+                FindMatchingCombinations cellE.Value, rngF, selectedCount, threshold, cellE, colorIndex, foundMatch, 0, rngE.Offset(0, 1).Resize(rngE.Rows.Count, rngE.Columns.Count - 1)
             End If
             
             ' Increment the color index for the next combination
@@ -75,7 +75,7 @@ Sub FindMatchingCombinations(amount As Double, rng As Range, selectedCount As In
             If selectedCount > 2 Then
                 If Not foundMatch Then
                     ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, selectedCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange
+                    FindRemainingNumbers amount, rngF, selectedCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange.Offset(0, 1).Resize(excludeRange.Rows.Count, excludeRange.Columns.Count - 1)
                 End If
             End If
         End If
@@ -112,7 +112,7 @@ Sub FindRemainingNumbers(amount As Double, rng As Range, remainingCount As Integ
             If remainingCount > 2 Then
                 If Not foundMatch Then
                     ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, remainingCount - 1, threshold, cellE, cellG, colorIndex, foundMatch, iterationCount, excludeRange
+                    FindRemainingNumbers amount, rngF, remainingCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange.Offset(0, 1).Resize(excludeRange.Rows.Count, excludeRange.Columns.Count - 1)
                 End If
             End If
         End If
