@@ -1,15 +1,18 @@
 Sub ReconcileAndMatch()
     On Error GoTo ErrorHandler
     
-    Dim rngE As Range, rngF As Range, rngD As Range
-    Dim cellE As Range, cellF As Range, cellD As Range
+    Dim rngE As Range, rngF As Range
+    Dim cellE As Range, cellF As Range
     Dim combination As String
     Dim foundMatch As Boolean
+    Dim colorIndex As Long
     
-    ' Set the ranges for columns E, F, and D
+    ' Set the ranges for columns E and F
     Set rngE = Range("E9:E15")
     Set rngF = Range("F9:F15")
-    Set rngD = Range("D9:D15")
+    
+    ' Set the initial color index
+    colorIndex = 3 ' Start with color yellow (color index 3)
     
     ' Loop through each combination of cells in columns E and F
     For Each cellE In rngE
@@ -20,14 +23,12 @@ Sub ReconcileAndMatch()
             If cellE.Value = cellF.Value Then
                 foundMatch = True
                 
-                ' Print statement for matching combinations
-                Debug.Print combination & " is a match."
+                ' Highlight the matching numbers with a unique color
+                cellE.Interior.ColorIndex = colorIndex
+                cellF.Interior.ColorIndex = colorIndex
                 
-                ' Find the corresponding cell in column D
-                Set cellD = rngD.Cells(cellF.Row - rngF.Cells(1).Row + 1)
-                
-                ' Add a letter to indicate the position
-                cellD.Value = cellD.Value & Chr(64 + cellE.Row - rngE.Cells(1).Row + 1)
+                ' Increment the color index for the next combination
+                colorIndex = colorIndex + 1
                 
                 ' Exit the inner loop if a match is found
                 Exit For
