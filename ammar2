@@ -18,7 +18,7 @@ Sub FindEqualCombinations()
     
     ' Start the recursive backtracking
     ReDim result(1 To 1) ' Initialize result array
-    Backtrack valuesA, valuesB, used, result, count, 1, Array(0)
+    Backtrack valuesA, valuesB, used, result, count, 1, Array(1 To UBound(valuesA, 1) + 1)
     
     ' Output the equal combinations to the immediate window
     For i = 1 To count
