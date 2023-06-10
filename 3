@@ -5,6 +5,7 @@ Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, re
     Dim cellB As Range
     Dim combination As Variant
     Dim i As Long
+    Dim j As Long
     
     ' Modify these ranges to match your data
     Set rngA = Range("E8:E18")
@@ -17,6 +18,12 @@ Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, re
     ' Loop through the result combinations
     For i = 1 To UBound(result)
         combination = result(i)
+        
+        ' Debug print to check combination values
+        Debug.Print "Combination Array:"
+        For j = LBound(combination) To UBound(combination)
+            Debug.Print "combination(" & j & "): " & combination(j)
+        Next j
         
         ' Loop through the values in the combination
         For Each cellA In rngA
