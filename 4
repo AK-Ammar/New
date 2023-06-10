@@ -24,10 +24,11 @@ Sub ReconcileAndMatch()
                 Set combinationDict = CreateObject("Scripting.Dictionary")
                 
                 ' Find combinations in column F that match the selected count
-                Dim key As String
+                Dim key As Variant
+                Dim value As Variant
                 For Each cellF In rngF
                     If cellF.Value <> "" Then
-                        key = CStr(cellF.Value)
+                        key = cellF.Value
                         If Not combinationDict.Exists(key) Then
                             combinationDict.Add key, cellF.Value
                         End If
@@ -42,8 +43,9 @@ Sub ReconcileAndMatch()
                 If Abs(cellE.Value - combinationSum) <= threshold Then
                     ' Highlight the matching combinations with a unique color
                     For Each key In combinationDict.Keys
-                        rngF.Cells(rngF.Find(what:=key).Row).Interior.ColorIndex = selectedCount + 2
-                        rngF.Cells(rngF.Find(what:=key).Row).Offset(0, -1).Interior.ColorIndex = selectedCount + 2
+                        value = combinationDict(key)
+                        rngF.Cells(rngF.Find(what:=value).Row).Interior.ColorIndex = selectedCount + 2
+                        rngF.Cells(rngF.Find(what:=value).Row).Offset(0, -1).Interior.ColorIndex = selectedCount + 2
                     Next key
                 End If
             End If
