@@ -21,7 +21,7 @@ Sub ReconcileAndMatch()
     
     ' Loop through each combination size
     For selectedCount = 2 To rngF.Rows.Count
-        ' Loop through each combination of cells in columns E and F
+        ' Loop through each cell in column E
         For Each cellE In rngE
             ' Skip empty cells in column E
             If cellE.Value <> "" Then
@@ -44,81 +44,53 @@ ErrorHandler:
 End Sub
 
 Function CheckCombinations(amount As Variant, rng As Range, selectedCount As Integer, threshold As Double, ByRef colorIndex As Long) As Boolean
-    Dim combinations() As Variant
-    Dim combination() As Variant
-    Dim index() As Integer
-    Dim i As Integer, j As Integer, k As Integer
+    Dim indices() As Integer
+    Dim i As Integer, j As Integer
     Dim sum As Double
     Dim foundMatch As Boolean
     
-    ' Generate combinations of the selected count from the range
-    combinations = GetCombinations(rng.Value, selectedCount)
+    ReDim indices(1 To selectedCount)
+    
+    ' Initialize indices
+    For i = 1 To selectedCount
+        indices(i) = i
+    Next i
     
     ' Loop through each combination
-    For i = LBound(combinations) To UBound(combinations)
-        combination = combinations(i)
+    Do While indices(1) <= rng.Rows.Count - selectedCount + 1
         sum = 0
         
         ' Calculate the sum of the combination
-        For j = LBound(combination) To UBound(combination)
-            sum = sum + combination(j)
-        Next j
+        For i = 1 To selectedCount
+            sum = sum + rng.Cells(indices(i)).Value
+        Next i
         
         ' Check if the sum is within the threshold
         If Abs(amount - sum) <= threshold Then
             foundMatch = True
             
             ' Highlight the matching combinations with a unique color
-            For k = LBound(combination) To UBound(combination)
-                rng.Cells(k + 1).Offset(0, -1).Interior.ColorIndex = colorIndex
-                rng.Cells(k + 1).Interior.ColorIndex = colorIndex
-            Next k
+            For i = 1 To selectedCount
+                rng.Cells(indices(i)).Offset(0, -1).Interior.ColorIndex = colorIndex
+                rng.Cells(indices(i)).Interior.ColorIndex = colorIndex
+            Next i
         End If
-    Next i
+        
+        ' Generate the next combination
+        j = selectedCount
+        Do While j >= 1 And indices(j) >= rng.Rows.Count - selectedCount + j
+            j = j - 1
+        Loop
+        
+        If j = 0 Then Exit Do
+        
+        indices(j) = indices(j) + 1
+        
+        For i = j + 1 To selectedCount
+            indices(i) = indices(i - 1) + 1
+        Next i
+    Loop
     
     ' Return whether a match was found
     CheckCombinations = foundMatch
-End Function
-
-Function GetCombinations(data() As Variant, selectedCount As Integer) As Variant()
-    Dim combinations() As Variant
-    Dim indices() As Integer
-    Dim i As Integer, j As Integer, n As Integer, r As Integer
-    Dim lastIndex As Integer
-    
-    n = UBound(data) - LBound(data) + 1
-    r = selectedCount
-    
-    ReDim combinations(1 To Application.WorksheetFunction.Combin(n, r))
-    ReDim indices(1 To r)
-    
-    For i = 1 To r
-        indices(i) = i
-    Next i
-    
-    i = 1
-    Do While i > 0
-        For j = 1 To r
-            combinations(lastIndex + 1, j) = data(indices(j))
-        Next j
-        
-        lastIndex = lastIndex + 1
-        
-        If indices(r) = n Then
-            i = r - 1
-            Do While i > 0 And indices(i) = n - r + i
-                i = i - 1
-            Loop
-        Else
-            indices(r) = indices(r) + 1
-        End If
-        
-        If i > 0 Then
-            For j = i To r
-                indices(j) = indices(i) + j - i
-            Next j
-        End If
-    Loop
-    
-    GetCombinations = combinations
 End Function
