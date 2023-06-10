@@ -52,12 +52,29 @@ ErrorHandler:
     Resume Next
 End Sub
 
-Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range, threshold As Double) As Boolean
+Function IsCombinationMatch(amount As Variant, targetCell As Range, targetRange As Range, threshold As Double, Optional selectedCount As Integer = 1) As Boolean
     Dim cell As Range
+    Dim remainingCount As Integer
+    Dim remainingRange As Range
+    Dim remainingAmount As Double
     
-    For Each cell In targetRange
-        If cell.Address <> targetCell.Address And cell.Value <> "" Then
-            If Abs(amount - (cell.Value + targetCell.Value)) <= threshold Then
+    remainingCount = selectedCount - 1
+    
+    ' Base case: selectedCount is 1, check if the remaining amount is within the threshold
+    If remainingCount = 0 Then
+        remainingAmount = amount - targetCell.Value
+        If Abs(remainingAmount) <= threshold Then
+            IsCombinationMatch = True
+        End If
+        Exit Function
+    End If
+    
+    ' Recursive case: selectedCount is greater than 1
+    Set remainingRange = Range(targetCell.Offset(1), targetRange.Cells(targetRange.Cells.Count))
+    
+    For Each cell In remainingRange
+        If cell.Value <> "" Then
+            If IsCombinationMatch(amount - targetCell.Value, cell, remainingRange, threshold, remainingCount) Then
                 IsCombinationMatch = True
                 Exit Function
             End If
