@@ -17,7 +17,7 @@ Sub FindEqualCombinations()
     count = 0 ' Initialize count
     
     ' Start the recursive backtracking
-    Backtrack valuesA, valuesB, used, result, count, 1
+    Backtrack valuesA, valuesB, used, result, count, 1, Array()
     
     ' Output the equal combinations to the immediate window
     For i = 1 To UBound(result)
@@ -25,9 +25,8 @@ Sub FindEqualCombinations()
     Next i
 End Sub
 
-Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long)
+Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long, combination() As Variant)
     Dim i As Long
-    Dim combination() As Variant
     
     If level > UBound(valuesA) + 1 Then ' All positions in the combination have been filled
         Dim equal As Boolean
@@ -46,15 +45,13 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
             result(count) = combination ' Copy the combination to the result array
         End If
     Else
-        ReDim combination(1 To UBound(valuesA, 1), 1 To 1) ' Create array for the current combination
-        
         For i = 1 To UBound(valuesA) + 1
             If Not used(i - 1) Then
                 used(i - 1) = True ' Mark the value as used
+                ReDim Preserve combination(1 To level, 1 To 1)
                 combination(level, 1) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
-                valuesB(level, 1) = valuesB(i - 1, 1) ' Assign the value from column B to the current position
                 
-                Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
+                Backtrack valuesA, valuesB, used, result, count, level + 1, combination ' Recursive call
                 
                 used(i - 1) = False ' Reset the used flag
             End If
