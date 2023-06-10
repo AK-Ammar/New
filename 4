@@ -47,6 +47,7 @@ Sub PerformMatching(rngE As Range, rngF As Range, threshold As Double)
             For Each cellF In rngF
                 ' Skip empty cells in column F
                 If Not IsEmpty(cellF.Value) Then
+                    Debug.Print "Matching combination: " & cellE.Value & " + " & cellF.Value
                     ' Perform recursive matching and highlighting
                     RecursiveMatchAndHighlight cellE, cellF, threshold
                 End If
@@ -66,10 +67,12 @@ Sub RecursiveMatchAndHighlight(cellE As Range, cellF As Range, threshold As Doub
         ' Highlight the matching combination with a unique color
         cellE.Interior.Color = RGB(255, 255, 0) ' Yellow color
         cellF.Interior.Color = RGB(255, 255, 0) ' Yellow color
+        Debug.Print "Matching combination found: " & cellE.Value & " + " & cellF.Value
     End If
     
     ' Perform recursive matching for the remaining cells in column F
     For Each cell In cellF.Offset(1).Resize(cellF.Parent.Cells(Rows.Count, cellF.Column).End(xlUp).Row - cellF.Row)
+        Debug.Print "Recursive matching: " & cellE.Value & " + " & cell.Value
         RecursiveMatchAndHighlight cellE, cell, threshold
     Next cell
 End Sub
