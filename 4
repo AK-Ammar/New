@@ -1,0 +1,53 @@
+Sub ReconcileAndMatch()
+    On Error GoTo ErrorHandler
+    
+    Dim rngE As Range, rngF As Range, rngD As Range
+    Dim cellE As Range, cellF As Range, cellD As Range
+    Dim combination As String
+    Dim foundMatch As Boolean
+    
+    ' Set the ranges for columns E, F, and D
+    Set rngE = Range("E9:E15")
+    Set rngF = Range("F9:F15")
+    Set rngD = Range("D9:D15")
+    
+    ' Loop through each combination of cells in columns E and F
+    For Each cellE In rngE
+        For Each cellF In rngF
+            combination = cellE.Value & " - " & cellF.Value
+            
+            ' Check if the combination is equal
+            If cellE.Value = cellF.Value Then
+                foundMatch = True
+                
+                ' Print statement for matching combinations
+                Debug.Print combination & " is a match."
+                
+                ' Find the corresponding cell in column D
+                Set cellD = rngD.Cells(cellF.Row - rngF.Cells(1).Row + 1)
+                
+                ' Add a letter to indicate the position
+                cellD.Value = cellD.Value & Chr(64 + cellE.Row - rngE.Cells(1).Row + 1)
+                
+                ' Exit the inner loop if a match is found
+                Exit For
+            End If
+        Next cellF
+        
+        ' Print statement for non-matching combinations
+        If Not foundMatch Then
+            Debug.Print combination & " is not a match."
+        End If
+        
+        ' Reset the flag for the next iteration
+        foundMatch = False
+    Next cellE
+    
+    ' Exit the sub if there are no errors
+    Exit Sub
+    
+ErrorHandler:
+    ' Error handling code
+    Debug.Print "An error occurred: " & Err.Description
+    Resume Next
+End Sub
