@@ -1,43 +1,46 @@
-Function GenerateCombinations(valuesA() As Variant, valuesB() As Variant) As Variant()
-    Dim result() As Variant
-    Dim count As Long
-    Dim i As Long
-    Dim j As Long
-    Dim level As Long
-    Dim used() As Boolean
-    Dim combination() As Variant
+Sub ReconcileAndMatch()
+    On Error GoTo ErrorHandler
     
-    count = 0
-    ReDim result(1 To UBound(valuesA) * UBound(valuesB), 1 To 2)
-    ReDim used(1 To UBound(valuesA) + 1)
-    ReDim combination(1 To 2)
+    Dim rngE As Range, rngF As Range
+    Dim cellE As Range, cellF As Range
+    Dim combination As String
+    Dim foundMatch As Boolean
     
-    Backtrack valuesA, valuesB, used, result, count, 1, combination
+    ' Set the ranges for columns E and F
+    Set rngE = Range("E9:E15")
+    Set rngF = Range("F9:F15")
     
-    ReDim Preserve result(1 To count)
-    GenerateCombinations = result
-End Function
-
-Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, result() As Variant, ByRef count As Long, ByVal level As Long, ByRef combination() As Variant)
-    Dim i As Long
-    
-    If level > 2 Then
-        count = count + 1
-        result(count)(1) = combination(1)
-        result(count)(2) = combination(2)
-        Exit Sub
-    End If
-    
-    For i = 1 To UBound(valuesA)
-        If Not used(i) Then
-            used(i) = True
-            If level = 1 Then
-                combination(level) = valuesA(i, 1)
-            Else
-                combination(level) = valuesB(i, 1)
+    ' Loop through each combination of cells in columns E and F
+    For Each cellE In rngE
+        For Each cellF In rngF
+            combination = cellE.Value & " - " & cellF.Value
+            
+            ' Check if the combination is equal
+            If cellE.Value = cellF.Value Then
+                foundMatch = True
+                
+                ' Print statement for matching combinations
+                Debug.Print combination & " is a match."
+                
+                ' Exit the inner loop if a match is found
+                Exit For
             End If
-            Backtrack valuesA, valuesB, used, result, count, level + 1, combination
-            used(i) = False
+        Next cellF
+        
+        ' Print statement for non-matching combinations
+        If Not foundMatch Then
+            Debug.Print combination & " is not a match."
         End If
-    Next i
+        
+        ' Reset the flag for the next iteration
+        foundMatch = False
+    Next cellE
+    
+    ' Exit the sub if there are no errors
+    Exit Sub
+    
+ErrorHandler:
+    ' Error handling code
+    Debug.Print "An error occurred: " & Err.Description
+    Resume Next
 End Sub
