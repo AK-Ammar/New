@@ -6,12 +6,13 @@ Sub FindEqualCombinations()
     Dim result() As Variant
     Dim used() As Boolean
     Dim count As Long
+    Dim i As Long
     
     ' Modify these arrays to include your values
     valuesA = Range("A1:A5").Value
     valuesB = Range("B1:B5").Value
     
-    ReDim used(1 To UBound(valuesA) + 1) ' Array to track which values are used in the current combination
+    ReDim used(0 To UBound(valuesA)) ' Array to track which values are used in the current combination
     
     count = 0 ' Initialize count
     ReDim result(1 To count) ' Initialize result array
@@ -46,14 +47,14 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, res
         End If
     Else
         For i = 1 To UBound(valuesA) + 1
-            If Not used(i) Then
-                used(i) = True ' Mark the value as used
+            If Not used(i - 1) Then
+                used(i - 1) = True ' Mark the value as used
                 valuesA(level - 1, 1) = valuesA(i - 1, 1) ' Assign the value from column A to the current position
                 valuesB(level - 1, 1) = valuesB(i - 1, 1) ' Assign the value from column B to the current position
                 
                 Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
                 
-                used(i) = False ' Reset the used flag
+                used(i - 1) = False ' Reset the used flag
             End If
         Next i
     End If
