@@ -115,7 +115,9 @@ Sub HighlightMatchingCombinations(valuesA() As Variant, valuesB() As Variant, re
                 For Each cellB In rngB
                     If Not IsEmpty(cellB) Then
                         ' Check if the combination matches the values in columns A and B
-If Abs(cellA.Value - combination(1)) < 0.0001 And Abs(cellB.Value - combination(2)) < 0.0001 Then
+'If Abs(cellA.Value - combination(1)) < 0.0001 And Abs(cellB.Value - combination(2)) < 0.0001 Then
+If CStr(cellA.Value) = CStr(combination(1)) And CStr(cellB.Value) = CStr(combination(2)) Then
+
                             ' Highlight the matching cells
                             cellA.Interior.Color = RGB(255, 255, 0) ' Yellow
                             cellB.Interior.Color = RGB(255, 255, 0) ' Yellow
