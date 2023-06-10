@@ -3,70 +3,23 @@ Option Explicit
 Sub ReconcileAndMatch()
     On Error GoTo ErrorHandler
     
+    Application.ScreenUpdating = False ' Turn off screen updating for faster processing
+    
     Dim rngE As Range, rngF As Range
-    Dim cellE As Range, cellF As Range, cellG As Range
-    Dim combination As String
-    Dim foundMatch As Boolean
-    Dim colorIndex As Long
     Dim threshold As Double
-    Dim selectedCount As Integer
     
     ' Set the ranges for columns E and F
     Set rngE = Range("E9:E15")
     Set rngF = Range("F9:F15")
     
-    ' Set the initial color index
-    colorIndex = 3 ' Start with color yellow (color index 3)
-    
     ' Get the threshold value from cell B3
     threshold = Range("B3").Value
     
-    ' Loop through each combination size
-    For selectedCount = 2 To rngF.Rows.Count
-        ' Loop through each cell in column E
-        For Each cellE In rngE
-            ' Skip empty cells in column E
-            If cellE.Value <> "" Then
-                ' Loop through each combination of cells in column F
-                For Each cellF In rngF
-                    ' Skip empty cells in column F
-                    If cellF.Value <> "" Then
-                        ' Check if the combination is equal
-                        If selectedCount = 2 Then
-                            ' Check if the combination is within the threshold
-                            If Abs(cellE.Value - cellF.Value) <= threshold Then
-                                foundMatch = True
-                                ' Highlight the matching combination with a unique color
-                                cellE.Interior.ColorIndex = colorIndex
-                                cellF.Interior.ColorIndex = colorIndex
-                            End If
-                        Else
-                            ' Loop through each cell in column F again
-                            For Each cellG In rngF
-                                ' Skip empty cells in column F
-                                If cellG.Value <> "" Then
-                                    ' Calculate the combination
-                                    combination = cellE.Value + cellF.Value + cellG.Value
-                                    ' Check if the combination is within the threshold
-                                    If Abs(combination - threshold) <= threshold Then
-                                        foundMatch = True
-                                        ' Highlight the matching combination with a unique color
-                                        cellE.Interior.ColorIndex = colorIndex
-                                        cellF.Interior.ColorIndex = colorIndex
-                                        cellG.Interior.ColorIndex = colorIndex
-                                    End If
-                                End If
-                            Next cellG
-                        End If
-                    End If
-                Next cellF
-                
-                ' Increment the color index for the next combination
-                If foundMatch Then colorIndex = colorIndex + 1
-                foundMatch = False
-            End If
-        Next cellE
-    Next selectedCount
+    ' Reset colors in columns E and F
+    ResetColors rngE, rngF
+    
+    ' Perform matching and highlighting
+    PerformMatching rngE, rngF, threshold
     
     ' Exit the sub if there are no errors
     Exit Sub
@@ -75,4 +28,48 @@ ErrorHandler:
     ' Error handling code
     Debug.Print "An error occurred: " & Err.Description
     Resume Next
+End Sub
+
+Sub ResetColors(rngE As Range, rngF As Range)
+    rngE.Interior.ColorIndex = xlNone ' Reset interior color for column E
+    rngF.Interior.ColorIndex = xlNone ' Reset interior color for column F
+End Sub
+
+Sub PerformMatching(rngE As Range, rngF As Range, threshold As Double)
+    Dim cellE As Range
+    Dim cellF As Range
+    
+    ' Loop through each cell in column E
+    For Each cellE In rngE
+        ' Skip empty cells in column E
+        If Not IsEmpty(cellE.Value) Then
+            ' Loop through each cell in column F
+            For Each cellF In rngF
+                ' Skip empty cells in column F
+                If Not IsEmpty(cellF.Value) Then
+                    ' Perform recursive matching and highlighting
+                    RecursiveMatchAndHighlight cellE, cellF, threshold
+                End If
+            Next cellF
+        End If
+    Next cellE
+End Sub
+
+Sub RecursiveMatchAndHighlight(cellE As Range, cellF As Range, threshold As Double)
+    Dim cell As Range
+    Dim combination As Double
+    
+    combination = cellE.Value + cellF.Value
+    
+    ' Check if the combination is within the threshold
+    If Abs(combination - threshold) <= threshold Then
+        ' Highlight the matching combination with a unique color
+        cellE.Interior.Color = RGB(255, 255, 0) ' Yellow color
+        cellF.Interior.Color = RGB(255, 255, 0) ' Yellow color
+    End If
+    
+    ' Perform recursive matching for the remaining cells in column F
+    For Each cell In cellF.Offset(1).Resize(cellF.Parent.Cells(Rows.Count, cellF.Column).End(xlUp).Row - cellF.Row)
+        RecursiveMatchAndHighlight cellE, cell, threshold
+    Next cell
 End Sub
