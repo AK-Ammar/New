@@ -11,7 +11,7 @@ Sub FindEqualCombinations()
     valuesA = Range("E8:E18").Value
     valuesB = Range("F8:F15").Value
     
-    ReDim used(0 To UBound(valuesA, 1) - 1) ' Array to track which values are used in the current combination
+    ReDim used(1 To UBound(valuesA, 1)) ' Array to track which values are used in the current combination
     
     count = 0 ' Initialize count
     
@@ -32,11 +32,11 @@ End Sub
 Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByRef result() As Variant, ByRef count As Long, ByVal level As Long)
     Dim i As Long
     
-    If level > UBound(valuesA, 1) + 1 Then ' All positions in the combination have been filled
+    If level > UBound(valuesA, 1) Then ' All positions in the combination have been filled
         Dim equal As Boolean
         equal = True ' Assume the combination is equal
         
-        For i = 2 To UBound(used) + 1
+        For i = 2 To UBound(used)
             If Not used(i - 1) Or valuesA(i - 1, 1) <> valuesA(i, 1) Or valuesB(i - 1, 1) <> valuesB(i, 1) Then
                 equal = False ' Not equal
                 Exit For
@@ -49,15 +49,15 @@ Sub Backtrack(valuesA() As Variant, valuesB() As Variant, used() As Boolean, ByR
             result(count) = GetCombination(valuesA, used) ' Copy the combination to the result array
         End If
     ElseIf level = 2 Then ' Early exit check
-        If valuesA(0, 1) <> valuesA(1, 1) Or valuesB(0, 1) <> valuesB(1, 1) Then
+        If valuesA(1, 1) <> valuesA(2, 1) Or valuesB(1, 1) <> valuesB(2, 1) Then
             Exit Sub ' Not equal, exit early
         Else
-            used(0) = True ' Mark the first value as used
+            used(1) = True ' Mark the first value as used
             Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
-            used(0) = False ' Reset the used flag
+            used(1) = False ' Reset the used flag
         End If
     Else
-        For i = 0 To UBound(valuesA, 1) - 1
+        For i = 1 To UBound(valuesA, 1)
             If Not used(i) Then
                 used(i) = True ' Mark the value as used
                 Backtrack valuesA, valuesB, used, result, count, level + 1 ' Recursive call
@@ -79,7 +79,7 @@ Function GetCombination(valuesA() As Variant, used() As Boolean) As Variant
     ReDim combination(1 To maxCount)
     
     For i = 1 To maxCount
-        If used(i - 1) Then
+        If used(i) Then
             count = count + 1
             combination(count) = valuesA(i, 1)
         End If
