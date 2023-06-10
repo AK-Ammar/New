@@ -29,7 +29,7 @@ Sub ReconcileAndMatch()
             If cellE.Value <> "" Then
                 ' Recursively check combinations in column F
                 foundMatch = False
-                FindMatchingCombinations cellE.Value, rngF, selectedCount, threshold, cellE, colorIndex, foundMatch, 0
+                FindMatchingCombinations cellE.Value, rngF, selectedCount, threshold, cellE, colorIndex, foundMatch, 0, rngE
             End If
             
             ' Increment the color index for the next combination
@@ -46,13 +46,14 @@ ErrorHandler:
     Resume Next
 End Sub
 
-Sub FindMatchingCombinations(amount As Double, rng As Range, selectedCount As Integer, threshold As Double, ByRef cellE As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer)
+Sub FindMatchingCombinations(amount As Double, rng As Range, selectedCount As Integer, threshold As Double, ByRef cellE As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer, excludeRange As Range)
     Dim rngF As Range
     Dim cellF As Range
     Dim combination As Double
     
-    ' Set the range for column F
-    Set rngF = rng.Resize(rng.Rows.Count - (cellE.Row - rng.Row))
+    ' Set the range for column F excluding the selected cells in column E
+    Set rngF = rng.Resize(rng.Rows.Count - (excludeRange.Rows.Count - 1))
+    Set rngF = Application.Intersect(rngF, rngF.Worksheet.Columns(rngF.Column))
     
     ' Loop through each cell in column F
     For Each cellF In rngF
@@ -74,20 +75,21 @@ Sub FindMatchingCombinations(amount As Double, rng As Range, selectedCount As In
             If selectedCount > 2 Then
                 If Not foundMatch Then
                     ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, selectedCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount
+                    FindRemainingNumbers amount, rngF, selectedCount - 1, threshold, cellE, cellF, colorIndex, foundMatch, iterationCount, excludeRange
                 End If
             End If
         End If
     Next cellF
 End Sub
 
-Sub FindRemainingNumbers(amount As Double, rng As Range, remainingCount As Integer, threshold As Double, ByRef cellE As Range, ByRef cellF As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer)
+Sub FindRemainingNumbers(amount As Double, rng As Range, remainingCount As Integer, threshold As Double, ByRef cellE As Range, ByRef cellF As Range, ByRef colorIndex As Long, ByRef foundMatch As Boolean, ByVal iterationCount As Integer, excludeRange As Range)
     Dim rngF As Range
     Dim cellG As Range
     Dim combination As Double
     
-    ' Set the range for column F
-    Set rngF = rng.Resize(rng.Rows.Count - (cellF.Row - rng.Row))
+    ' Set the range for column F excluding the selected cells in column E and F
+    Set rngF = rng.Resize(rng.Rows.Count - (excludeRange.Rows.Count - 1))
+    Set rngF = Application.Intersect(rngF, rngF.Worksheet.Columns(rngF.Column))
     
     ' Loop through each cell in column F
     For Each cellG In rngF
@@ -110,7 +112,7 @@ Sub FindRemainingNumbers(amount As Double, rng As Range, remainingCount As Integ
             If remainingCount > 2 Then
                 If Not foundMatch Then
                     ' Recursively call the function to find the remaining numbers
-                    FindRemainingNumbers amount, rngF, remainingCount - 1, threshold, cellE, cellG, colorIndex, foundMatch, iterationCount
+                    FindRemainingNumbers amount, rngF, remainingCount - 1, threshold, cellE, cellG, colorIndex, foundMatch, iterationCount, excludeRange
                 End If
             End If
         End If
